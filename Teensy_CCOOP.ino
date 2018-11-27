@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <SD.h>
 #include <SPI.h>
-//#include <NWS_XBee.h>
 #include <WProgram.h>
 #include "GPS.h"
 #include <EEPROM.h>
@@ -13,7 +12,7 @@
 #define LTC_CS 30
 #define LTC_MISO  12
 #define LTC_SCK  13
-//
+
 #define LTC_DELAY           5 // 5 usec delay for commands on the i2c bus
 
 long tempMillis = 0;
@@ -264,7 +263,6 @@ void setup()
     usb.println(F("New Day Reboot: Default Initialization Values Used"));
     pullSiteID_Mem(); //pull saved site ID from memory
     rebootAlert = 1; //use default boot variables
-
   }
   if (tempMonth != month)
   {
@@ -512,7 +510,6 @@ void setDateTime() // Sets the date and time from the RTC
   usb.println(dayOfMonth, DEC);
   usb.println(month, DEC);
   usb.println(year, DEC);
-
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x00);
   Wire.write(decToBcd(second));    // 0 to bit 7 starts the clock
@@ -526,7 +523,6 @@ void setDateTime() // Sets the date and time from the RTC
   Wire.endTransmission();
   delay(5);
   getDateTime();
-
 }
 
 void getDateTime()// Gets the date and time from the RTC
@@ -534,9 +530,9 @@ void getDateTime()// Gets the date and time from the RTC
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x00);
   Wire.endTransmission();
-
+  
   Wire.requestFrom(RTC_I2C_ADDRESS, 7);
-
+  
   // A few of these need masks because certain bits are control bits
   second     = bcdToDec(Wire.read() & 0x7f);
   minute     = bcdToDec(Wire.read());
@@ -545,7 +541,7 @@ void getDateTime()// Gets the date and time from the RTC
   dayOfMonth = bcdToDec(Wire.read());
   month      = bcdToDec(Wire.read());
   year       = bcdToDec(Wire.read());
-
+  
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x11);
   Wire.endTransmission();
@@ -1032,7 +1028,6 @@ void reportTemp()
   usb.println(espString);
 }
 
-
 void clearObData()
 {
   minObTemp = 2555;
@@ -1042,7 +1037,6 @@ void clearObData()
   maxOb_Hr = 0;
   maxOb_Min = 0;
 }
-
 
 void resetData()
 {
