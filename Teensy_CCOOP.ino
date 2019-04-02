@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <SD.h>
 #include <SPI.h>
+//#include <NWS_XBee.h>
 #include <WProgram.h>
 #include "GPS.h"
 #include <EEPROM.h>
@@ -12,7 +13,7 @@
 #define LTC_CS 30
 #define LTC_MISO  12
 #define LTC_SCK  13
-
+//
 #define LTC_DELAY           5 // 5 usec delay for commands on the i2c bus
 
 long tempMillis = 0;
@@ -23,7 +24,7 @@ float volt = 0.0;
 long int ltw = 0;
 byte b0 = 0x00;
 byte sig = 0x00;
-float v_ref = 3.3; // Reference Voltage, 5.0 Volt for LT1021 or 3.0 for LP2950-3
+float v_ref = 4.096; // Reference Voltage, 5.0 Volt for LT1021 or 3.0 for LP2950-3
 
 int cnt = 0;
 
@@ -263,6 +264,7 @@ void setup()
     usb.println(F("New Day Reboot: Default Initialization Values Used"));
     pullSiteID_Mem(); //pull saved site ID from memory
     rebootAlert = 1; //use default boot variables
+
   }
   if (tempMonth != month)
   {
@@ -510,6 +512,9 @@ void setDateTime() // Sets the date and time from the RTC
   usb.println(dayOfMonth, DEC);
   usb.println(month, DEC);
   usb.println(year, DEC);
+
+  second = 5;
+
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x00);
   Wire.write(decToBcd(second));    // 0 to bit 7 starts the clock
@@ -523,6 +528,7 @@ void setDateTime() // Sets the date and time from the RTC
   Wire.endTransmission();
   delay(5);
   getDateTime();
+
 }
 
 void getDateTime()// Gets the date and time from the RTC
@@ -530,9 +536,9 @@ void getDateTime()// Gets the date and time from the RTC
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x00);
   Wire.endTransmission();
-  
+
   Wire.requestFrom(RTC_I2C_ADDRESS, 7);
-  
+
   // A few of these need masks because certain bits are control bits
   second     = bcdToDec(Wire.read() & 0x7f);
   minute     = bcdToDec(Wire.read());
@@ -541,7 +547,7 @@ void getDateTime()// Gets the date and time from the RTC
   dayOfMonth = bcdToDec(Wire.read());
   month      = bcdToDec(Wire.read());
   year       = bcdToDec(Wire.read());
-  
+
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x11);
   Wire.endTransmission();
@@ -592,6 +598,8 @@ void ntpUpdateTime()
   usb.println(dayOfMonth, DEC);
   usb.println(month, DEC);
   usb.println(year, DEC);
+
+  second = 5;
 
   Wire.beginTransmission(RTC_I2C_ADDRESS);
   Wire.write((byte)0x00);
@@ -1028,6 +1036,7 @@ void reportTemp()
   usb.println(espString);
 }
 
+
 void clearObData()
 {
   minObTemp = 2555;
@@ -1037,6 +1046,7 @@ void clearObData()
   maxOb_Hr = 0;
   maxOb_Min = 0;
 }
+
 
 void resetData()
 {
@@ -3075,12 +3085,15 @@ void checkFPR()
   {
     while (fpr.available() > 0)
     {
+      //usb.println(F("Available!!"));
       byte c = fpr.read();
+      //usb.println(c);
       if (c == 10)
       {
         //readingTimer = millis();
         delay(20);
         c = fpr.read();
+        Serial.print(c);
         if (c == 35)
         {
           readingString = "#";
