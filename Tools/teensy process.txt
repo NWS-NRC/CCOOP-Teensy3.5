@@ -1,0 +1,10 @@
+5. The Teensy 3.1 Arduino/Teensyduino build creates an Intel Hex output file. The uTasker Serial Loader generally works with SREC or Binary files and the standard output can be converted to one of these by using GCC's objcopy - it is simplest to create a bat file with the commands that can be executed after each project build. Assuming that the output from the build is a file called software.hex the following commands will create both SREC and binary versions form it. In addition, using the uTasker utility "uTaskerCombine" [ http://www.utasker.com/forum/index.php?topic=1445.0 ] a combined serial loader/aplication binary can be created that can then be loaded as a single file (loader plus application), which is useful for a production environment in order to be able to load one complete software rather than first the loader and then the first application.
+
+objcopy --input-target=ihex --output-target=binary software.hex application.bin
+objcopy --input-target=ihex --output-target=srec software.hex application.srec
+uTaskerCombine uTaskerSerialLoader.bin application.bin 0x8080 file3.bin combinedLoaderApp.bin
+Note that the application's start address must also match when combining the binary files
+
+6. When working with SD card loading (rarer case with the Teensy) the software file loaded to the SD card needs an additional header for authentication (and can be optionally encrypted). To do this the uTasker utility uTaskerConvert is used (see the utilities link above). The command for the reference serial loader without encryption is
+uTaskerConvert.exe application.bin software.bin -0x1234 -a748b6531124
+For full details of adding authentication and encryption see chapter 8 of http://www.utasker.com/docs/uTasker/uTasker_BM_Loader.pdf
